@@ -12,13 +12,17 @@ WORKDIR /opt/
 COPY R-packages.R /opt/
 RUN set -xe && Rscript /opt/R-packages.R && rm /opt/R-packages.R
 
-RUN set -e \
-      && locale-gen en_US.UTF-8 \
-	&& useradd -m -d /home/rstudio -G rstudio-server rstudio \
-      && echo rstudio:rstudio | chpasswd
+RUN set -xe \
+    && apt-get update \
+    && apt-get -y install jags \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY R-packages_2.R /opt/
+RUN set -xe && Rscript /opt/R-packages_2.R && rm /opt/R-packages_2.R
 
 COPY useradd.sh /opt/
 RUN set -xe \
+    && cp /usr/share/zoneinfo/Asia/Shanghai  /etc/localtime \
 	&& bash /opt/useradd.sh \
 	&& rm -rf /opt/useradd.sh
 
